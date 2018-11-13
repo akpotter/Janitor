@@ -1,7 +1,7 @@
 # Janitor
 Smalll bash script to scrub any and all logs/traces of malicious activity of a penetrated linux box.
 
-## Leaving things as you found them
+## Cleaning up your messes
 Once root access is gained to a system, one should remove any trace of themselves in the authlog, syslog, histfile (.bash_history for root and whatever user) as well as utmp, wtmp, and btmp (if you had any failed login attempts) and any other logs.
 
 Note: I still need to expand the slept background processes to more than just auth.log
